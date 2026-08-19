@@ -45,11 +45,11 @@ See [`docs/tools.md`](docs/tools.md) for the complete 26-tool surface and per-to
 
 Releases are distributed as immutable GitHub Release wheels. `romm-mcp` is not currently published to PyPI.
 
-For v0.1.0:
+For v0.1.1:
 
 ```bash
 uvx --python 3.12 \
-  --from https://github.com/X1pheR/romm-mcp/releases/download/v0.1.0/romm_mcp-0.1.0-py3-none-any.whl \
+  --from https://github.com/X1pheR/romm-mcp/releases/download/v0.1.1/romm_mcp-0.1.1-py3-none-any.whl \
   romm-mcp
 ```
 
@@ -92,7 +92,7 @@ users.read
     "--python",
     "3.12",
     "--from",
-    "https://github.com/X1pheR/romm-mcp/releases/download/v0.1.0/romm_mcp-0.1.0-py3-none-any.whl",
+    "https://github.com/X1pheR/romm-mcp/releases/download/v0.1.1/romm_mcp-0.1.1-py3-none-any.whl",
     "romm-mcp"
   ],
   "env": {
@@ -110,6 +110,8 @@ The RomM Client API Token and its upstream scopes are the hard authorization bou
 The MCP layer adds a second boundary:
 
 - Credentials are file-backed and omitted from tool schemas.
+- Every upstream JSON response crosses a centralized recursive sanitizer that redacts credential-like fields and credential-bearing URL query parameters, including nested error payloads.
+- Every exposed tool then returns a bounded allow-listed response model instead of raw RomM API objects; provider metadata, filesystem internals, unnecessary authorization details and unrelated PII are excluded.
 - There is no generic request tool.
 - Remote cover/manual URLs are not accepted, avoiding server-side asset fetch/write behavior through this MCP.
 - Note, regular-collection and smart-collection deletion require explicit `confirm=true`.

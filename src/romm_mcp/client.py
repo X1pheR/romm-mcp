@@ -4,6 +4,8 @@ from typing import Any
 
 import httpx
 
+from .output import safe_error_detail, sanitize_outbound
+
 
 class RomMError(RuntimeError):
     pass
@@ -40,9 +42,9 @@ class RomMClient:
         if response.status_code >= 400:
             detail = ""
             try:
-                body = response.json()
+                body = sanitize_outbound(response.json())
                 if isinstance(body, dict):
-                    detail = str(body.get("detail") or body.get("message") or "")
+                    detail = safe_error_detail(body.get("detail") or body.get("message") or "")
             except ValueError:
                 pass
             suffix = f": {detail}" if detail else ""
@@ -51,5 +53,5 @@ class RomMClient:
             return {"ok": True}
         content_type = response.headers.get("content-type", "")
         if "json" in content_type:
-            return response.json()
+            return sanitize_outbound(response.json())
         return {"ok": True, "status_code": response.status_code}
