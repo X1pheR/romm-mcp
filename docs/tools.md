@@ -1,10 +1,10 @@
 # Tool reference
 
-RomM MCP v0.1.0 exposes exactly 26 explicit tools. It does not expose a generic HTTP/API passthrough.
+RomM MCP v0.1.1 exposes exactly 26 explicit tools. It does not expose a generic HTTP/API passthrough.
 
 | Tool | Access | Destructive | Purpose / side effects |
 |---|---|---:|---|
-| `health` | Read | No | Verifies authenticated API access and returns the current user plus effective permissions. |
+| `health` | Read | No | Verifies authenticated API access and returns non-sensitive connectivity identity only. |
 | `list_platforms` | Read | No | Lists platforms visible to the token. |
 | `get_platform` | Read | No | Gets one platform by internal ID. |
 | `list_roms` | Read | No | Searches/lists ROMs with bounded pagination and common filters. |
@@ -30,6 +30,41 @@ RomM MCP v0.1.0 exposes exactly 26 explicit tools. It does not expose a generic 
 | `list_users` | Read | No | Lists users visible to `users.read`; no user mutation is exposed. |
 | `get_user` | Read | No | Gets one user; no permission or authorization mutation is exposed. |
 | `list_play_sessions` | Read | No | Lists play sessions for the token owner with bounded pagination. |
+
+## Outbound response-contract matrix
+
+All upstream responses are recursively sanitized before these per-tool allow-list projections are applied. URL query parameter names such as token, password, secret and API-key variants are matched case-insensitively. The matrix is intentionally explicit so every exposed tool has a reviewed outbound contract.
+
+| Tool | Structured output | Retained fields / bounded result | Explicitly excluded upstream detail |
+|---|---|---|---|
+| `health` | `HealthView` | Connectivity/authentication booleans plus current `user_id` and `username`. | Effective permissions/scopes, email, UI/device/RA data and other `/users/me` fields. |
+| `list_platforms` | `ListView[PlatformView]` | Up to 200 platform IDs, display names/slugs, ROM count and compact classification/status fields. | Provider IDs/URLs, firmware payloads, filesystem sizes and timestamps. |
+| `get_platform` | `PlatformView` | One platform ID, display name/slug, ROM count and compact classification/status fields. | Provider IDs/URLs, firmware payloads, filesystem sizes and timestamps. |
+| `list_roms` | `ListView[RomView]` | Requested page up to 200 ROM IDs, names, platform identity, compact metadata facets and personal status fields; summary omitted in list mode. | Provider metadata/URLs/IDs, files/paths/hashes, screenshots/assets, sibling payloads and unrelated indexes/filter payloads. |
+| `get_rom` | `RomView` | One ROM ID, name/platform identity, bounded summary, common metadata facets and personal status fields. | Provider metadata/URLs/IDs, files/paths/hashes, screenshots/assets and sibling payloads. |
+| `update_rom_metadata` | `RomView` | Bounded post-update ROM projection, always retaining the target ROM ID. | Raw write response, provider/file/asset internals. |
+| `update_rom_user_properties` | `RomUserPropertiesView` | Target `rom_id` plus only supported personal status/rating/difficulty/completion/backlog/hidden fields. | Internal RomUser record ID, user ID, timestamps and unrelated ROM/provider/file fields. |
+| `list_rom_notes` | `ListView[NoteView]` | Up to 100 note IDs, ROM IDs, bounded title/content/tags, visibility, author IDs/usernames and timestamps. | Avatar paths, user profile/authorization objects and unrelated note/user internals. |
+| `create_rom_note` | `NoteView` | Created note identity and bounded supported note fields. | Raw write response and unrelated user/profile internals. |
+| `update_rom_note` | `NoteView` | Updated note identity and bounded supported note fields. | Raw write response and unrelated user/profile internals. |
+| `delete_rom_note` | `OperationView` | `ok`, action and deleted note ID. | Raw delete response. |
+| `list_collections` | `ListView[CollectionView]` | Up to 200 collection IDs, name/description, ROM count, visibility/favorite state, owner username and timestamps. | Full `rom_ids`, cover paths/URLs, owner user ID and asset internals. |
+| `get_collection` | `CollectionView` | One compact collection summary with stable collection ID. | Full `rom_ids`, cover paths/URLs, owner user ID and asset internals. |
+| `create_collection` | `CollectionView` | Created collection identity and compact metadata. | Raw write response, artwork/asset internals and full membership payload. |
+| `update_collection` | `CollectionView` | Updated collection identity and compact metadata. | Raw write response, artwork/asset internals and full membership payload. |
+| `delete_collection` | `OperationView` | `ok`, action and deleted collection ID. | Raw delete response. |
+| `add_roms_to_collection` | `OperationView` | `ok`, action, collection ID and explicitly supplied ROM IDs. | Raw mutation response and collection internals. |
+| `remove_roms_from_collection` | `OperationView` | `ok`, action, collection ID and explicitly supplied ROM IDs. | Raw mutation response and collection internals. |
+| `list_smart_collections` | `ListView[SmartCollectionView]` | Up to 200 compact collection fields plus only the supported v0.1 smart-filter keys and bounded filter summary. | Asset internals, owner user ID and unknown/arbitrary filter fields. |
+| `get_smart_collection` | `SmartCollectionView` | One compact smart collection plus only supported filter keys. | Asset internals, owner user ID and unknown/arbitrary filter fields. |
+| `create_smart_collection` | `SmartCollectionView` | Created compact smart collection plus reviewed filter criteria. | Raw write response and arbitrary upstream fields. |
+| `update_smart_collection` | `SmartCollectionView` | Updated compact smart collection plus reviewed filter criteria. | Raw write response and arbitrary upstream fields. |
+| `delete_smart_collection` | `OperationView` | `ok`, action and deleted smart-collection ID. | Raw delete response. |
+| `list_users` | `ListView[UserView]` | Up to 200 user IDs, usernames and enabled state. | Email, role, permission group, OAuth scopes, UI settings, device ID, avatar/RA data and timestamps. |
+| `get_user` | `UserView` | User ID, username and enabled state. | Email, role, permission group, OAuth scopes, UI settings, device ID, avatar/RA data and timestamps. |
+| `list_play_sessions` | `ListView[PlaySessionView]` | Requested page up to 200 session IDs, ROM IDs, start/end and duration. | User/device IDs, sync-session ID, save slot and unrelated timestamps. |
+
+All 26 tools also publish MCP annotations. Reads set `readOnlyHint=true`, all tools set `openWorldHint=true` because they communicate with RomM, and only note/regular-collection/smart-collection deletion sets `destructiveHint=true`. Read tools set `idempotentHint=true`; write tools are conservatively not advertised as idempotent.
 
 ## Smart-collection filter schema
 

@@ -4,7 +4,7 @@ build-backend = "hatchling.build"
 
 [project]
 name = "romm-mcp"
-version = "0.1.0"
+version = "0.1.1"
 description = "A typed Model Context Protocol server for bounded RomM library management through its authenticated API."
 readme = "README.md"
 requires-python = ">=3.12"

@@ -23,3 +23,9 @@ The v0.1 server intentionally does not expose generic HTTP passthrough, ROM/file
 Deletion of notes, regular collections and smart collections requires an explicit `confirm=true` argument. RomM's regular-collection delete endpoint also removes resources owned by that collection (for example collection artwork); this MCP never deletes ROM files.
 
 The upstream RomM Client API Token scopes remain the hard authorization boundary. Deployments should grant only the scopes required for their selected tools.
+
+## Outbound data boundary
+
+RomM MCP does not intentionally return raw RomM API objects. Successful JSON responses and upstream error details first pass through a recursive sanitizer that removes credential-like values and redacts credential-bearing URL query parameters case-insensitively. Tool handlers then project upstream objects into explicit bounded response models.
+
+The projection boundary intentionally excludes provider-specific metadata payloads and URLs, ROM filesystem paths and hashes, user email/OAuth/permission/UI/device details, collection asset internals, and play-session device/sync internals unless a future explicit tool contract requires a reviewed field. Tests use synthetic credentials only.
