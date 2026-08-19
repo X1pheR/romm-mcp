@@ -119,13 +119,13 @@ See [`SECURITY.md`](SECURITY.md) for vulnerability reporting and credential-hand
 
 ## Development
 
-CI and release verification use an exact-pinned dependency set in `requirements-dev.txt` while the published package keeps compatible dependency ranges in `pyproject.toml`.
+`uv.lock` is the canonical exact dependency resolution used by CI and release verification, while the published package keeps compatible dependency ranges in `pyproject.toml`.
 
 ```bash
 bash ./scripts/verify.sh
 ```
 
-The verification script creates an isolated Python 3.12 environment, synchronizes the pinned dependency set, compiles the package, runs the test suite and builds the release wheel.
+The verification script creates an isolated Python 3.12 environment, synchronizes the frozen `uv.lock` resolution, compiles the package, runs the test suite and builds the release wheel.
 
 ## Upstream and license
 
