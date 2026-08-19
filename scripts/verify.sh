@@ -7,8 +7,7 @@ command -v uv >/dev/null 2>&1 || {
 }
 
 uv venv --clear --python 3.12
-uv pip sync requirements-dev.txt
-uv pip install --no-deps -e .
+uv sync --frozen --extra test
 .venv/bin/python - <<'PY'
 import importlib.metadata
 import tomllib
