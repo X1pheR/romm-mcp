@@ -1,5 +1,7 @@
 # RomM MCP
 
+[![M8ven Live Monitored](https://m8ven.ai/badge/mcp/x1pher-romm-mcp-vog58n)](https://m8ven.ai/mcp/x1pher-romm-mcp-vog58n)
+
 `romm-mcp` is a community-maintained Model Context Protocol (MCP) server for bounded management of [RomM](https://github.com/rommapp/romm) through RomM's authenticated API. It is not affiliated with, endorsed by, or maintained by the RomM project.
 
 The server is intentionally narrower than the complete RomM API: it provides explicit typed read/write tools for common library-management tasks without a generic HTTP passthrough or broad administrative escape hatch.
