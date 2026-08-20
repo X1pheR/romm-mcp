@@ -6,7 +6,7 @@ Security fixes are provided for the latest released version of RomM MCP.
 
 ## Reporting a vulnerability
 
-Please do not open a public issue for a suspected vulnerability. Use GitHub Private Vulnerability Reporting for this repository. If that channel is unavailable, contact the maintainer privately through the GitHub profile associated with this repository.
+Please do not open a public issue for a suspected vulnerability. Use [GitHub Private Vulnerability Reporting](https://github.com/X1pheR/romm-mcp/security/advisories/new) for this repository. If that channel is unavailable, contact the maintainer privately through the GitHub profile associated with this repository.
 
 Include enough information to reproduce and assess the issue without including real RomM Client API Tokens, passwords, session cookies, ROM contents, or other private data.
 
