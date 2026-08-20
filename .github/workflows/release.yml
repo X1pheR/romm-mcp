@@ -7,6 +7,8 @@ on:
 
 permissions:
   contents: write
+  id-token: write
+  attestations: write
 
 jobs:
   release:
@@ -48,6 +50,19 @@ jobs:
           mv dist-a dist
           rm -rf dist-b
           sha256sum dist/*.whl | sed 's#  dist/#  #' > SHA256SUMS
+      - name: Attest release artifacts
+        id: attest
+        uses: actions/attest@1e69f48acb82d1966a394da916b4c1698aa569d6 # v4
+        with:
+          subject-path: "dist/*.whl"
+      - name: Prepare provenance bundle
+        env:
+          ATTESTATION_BUNDLE: ${{ steps.attest.outputs.bundle-path }}
+        shell: bash
+        run: |
+          set -euo pipefail
+          test -s "${ATTESTATION_BUNDLE}"
+          cp "${ATTESTATION_BUNDLE}" "romm-mcp-${GITHUB_REF_NAME}.sigstore.json"
       - name: Create draft GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
@@ -59,7 +74,7 @@ jobs:
           GH_TOKEN: ${{ github.token }}
         run: |
           set -euo pipefail
-          gh release upload "${GITHUB_REF_NAME}" dist/*.whl SHA256SUMS
+          gh release upload "${GITHUB_REF_NAME}" dist/*.whl SHA256SUMS "romm-mcp-${GITHUB_REF_NAME}.sigstore.json"
       - name: Publish immutable GitHub Release
         env:
           GH_TOKEN: ${{ github.token }}
