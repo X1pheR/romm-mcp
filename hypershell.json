@@ -1,0 +1,6 @@
+{
+  "schema_version": 1,
+  "name": "RomM MCP",
+  "category": "Applications",
+  "kind": "mcp-server"
+}
